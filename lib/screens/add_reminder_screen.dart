@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/reminder.dart';
 
 class AddReminderScreen extends StatefulWidget {
   const AddReminderScreen({super.key});
@@ -33,17 +34,21 @@ class _AddReminderScreenState
   void saveReminder() {
 
     if (titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content:
-          Text("Please enter a title"),
-        ),
-      );
       return;
     }
 
-    Navigator.pop(context);
+    final reminder = Reminder(
+      id: DateTime.now()
+          .millisecondsSinceEpoch
+          .toString(),
+      title: titleController.text,
+      time: selectedTime.format(context),
+    );
+
+    Navigator.pop(
+      context,
+      reminder,
+    );
   }
 
   @override

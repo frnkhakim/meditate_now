@@ -2,7 +2,7 @@ class Reminder {
   final String id;
   final String title;
   final String time;
-  final bool enabled;
+  bool enabled;
 
   Reminder({
     required this.id,

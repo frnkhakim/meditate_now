@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/reminder.dart';
+import 'package:provider/provider.dart';
+import '../providers/reminder_provider.dart';
 
 class ReminderCard extends StatelessWidget {
   final Reminder reminder;
@@ -22,14 +24,28 @@ class ReminderCard extends StatelessWidget {
         ),
         title: Text(
           reminder.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
+            decoration:
+            reminder.enabled
+                ? null
+                : TextDecoration.lineThrough,
           ),
         ),
-        subtitle: Text(reminder.time),
+        subtitle: Text(
+          reminder.enabled
+              ? reminder.time
+              : "Disabled",
+        ),
         trailing: Switch(
           value: reminder.enabled,
-          onChanged: (_) {},
+          onChanged: (_) {
+            context
+                .read<ReminderProvider>()
+                .toggleReminder(
+              reminder.id,
+            );
+          },
         ),
       ),
     );
