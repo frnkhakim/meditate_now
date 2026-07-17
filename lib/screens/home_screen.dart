@@ -4,6 +4,10 @@ import 'add_reminder_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/reminder.dart';
 import '../providers/reminder_provider.dart';
+import '../providers/session_provider.dart';
+import 'statistics_screen.dart';
+import '../widgets/dashboard_card.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,17 +19,77 @@ class HomeScreen extends StatelessWidget {
 
     final reminders = provider.reminders;
 
+    final sessions =
+    context.watch<
+        SessionProvider>();
+
+    final streak =
+        sessions.streak;
+
+    final activeReminders =
+        reminders
+            .where(
+              (r) => r.enabled,
+        )
+            .length;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("MeditateNow"),
+        title: const Text("Meditation Now"),
+        actions: [
+
+          IconButton(
+            icon:
+            const Icon(
+              Icons.bar_chart,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                  const StatisticsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
 
 
+
       body: reminders.isEmpty
-          ? const Center(
-        child: Text(
-          "No meditation reminders yet 🧘",
-          style: TextStyle(fontSize: 20),
+          ? Center(
+        child: Column(
+          mainAxisAlignment:
+          MainAxisAlignment.center,
+          children: [
+
+            Icon(
+              Icons.spa,
+              size: 120,
+              color: Colors.purple.shade300,
+            ),
+
+            const SizedBox(
+                height: 20),
+
+            const Text(
+              "Begin Your Journey",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight:
+                FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(
+                height: 10),
+
+            const Text(
+              "Create your first meditation reminder.",
+            ),
+          ],
         ),
       )
           : Column(
@@ -38,6 +102,59 @@ class HomeScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
+
+          Padding(
+            padding:
+            const EdgeInsets.all(16),
+            child: SizedBox(
+              width:
+              double.infinity,
+              child:
+              FilledButton.icon(
+                onPressed: () {
+
+                  context
+                      .read<
+                      SessionProvider>()
+                      .addSession();
+
+                },
+                icon: const Icon(
+                    Icons.spa),
+                label: const Text(
+                  "Complete Meditation",
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(
+            height: 180,
+            child: GridView.count(
+              crossAxisCount: 2,
+              physics:
+              const NeverScrollableScrollPhysics(),
+              children: [
+
+                DashboardCard(
+                  icon:
+                  Icons.local_fire_department,
+                  title: "Streak",
+                  value:
+                  "$streak",
+                ),
+
+                DashboardCard(
+                  icon:
+                  Icons.alarm,
+                  title:
+                  "Active",
+                  value:
+                  "$activeReminders",
+                ),
+              ],
+            ),
+          ),
 
           Expanded(
             child: ListView.builder(
@@ -107,8 +224,21 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                       child: ReminderCard(
-                        reminder:
-                        reminders[index],
+                        reminder: reminders[index],
+                        onTap: () async {
+                          final updated =
+                          await Navigator.push<Reminder>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddReminderScreen(
+                                reminder: reminders[index],
+                              ),
+                            ),
+                          );
+                          if (updated != null) {
+                            provider.updateReminder(updated);
+                          }
+                        },
                       ),
                     );
               },
@@ -134,7 +264,10 @@ class HomeScreen extends StatelessWidget {
           }
         },
         child: const Icon(Icons.add),
+
       ),
+
+
     );
   }
 }
